@@ -35,6 +35,23 @@ type BigQueryJobsWithStats struct {
 	Count               int            `json:"count"`
 	TotalBytesProcessed int64          `json:"total_bytes_processed"`
 	Query               string         `json:"query"`
+	UserEmail           string         `json:"user_email"`
+}
+
+func getMajority(slice []string) string {
+	cnt := make(map[string]int)
+	for _, s := range slice {
+		cnt[s] += 1
+	}
+	majority := ""
+	max := 0
+	for k, c := range cnt {
+		if c > max {
+			majority = k
+			max = c
+		}
+	}
+	return majority
 }
 
 func getJobClusters(jobs []*BigQueryJob, minThreshold int) []*BigQueryJobsWithStats {
@@ -75,14 +92,17 @@ func getJobClusters(jobs []*BigQueryJob, minThreshold int) []*BigQueryJobsWithSt
 	result := make([]*BigQueryJobsWithStats, 0)
 	for _, c := range clusters {
 		totalBytesProcessed := 0
+		users := make([]string, 0)
 		for _, j := range c {
 			totalBytesProcessed += int(j.TotalBytesProcessed)
+			users = append(users, j.UserEmail)
 		}
 		stats := &BigQueryJobsWithStats{
 			Jobs:                c,
 			Count:               len(c),
 			TotalBytesProcessed: int64(totalBytesProcessed),
 			Query:               c[0].Query,
+			UserEmail:           getMajority(users),
 		}
 		result = append(result, stats)
 	}
