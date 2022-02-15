@@ -13,21 +13,21 @@ import (
 )
 
 type BigQueryJob struct {
-	CreationTime  time.Time `json:"creation_time"`
-	ProjectId     string    `json:"project_id"`
-	ProjectNumber int64     `json:"project_number"`
-	UserEmail     string    `json:"user_email"`
-	JobId         string    `json:"job_id"`
-	JobType       string    `json:"job_type"`
-	StatementType string    `json:"statement_type"`
-	Priority      string    `json:"priority"`
-	StartTime     time.Time `json:"start_time"`
-	EndTime       time.Time `json:"end_time"`
-	Query         string    `json:"query"`
-	State         string    `json:"state"`
-	// ReservationId       string
-	TotalBytesProcessed int64 `json:"total_bytes_processed"`
-	// TotalSlotMs         int64
+	CreationTime        time.Time           `json:"creation_time"`
+	ProjectId           string              `json:"project_id"`
+	ProjectNumber       int64               `json:"project_number"`
+	UserEmail           string              `json:"user_email"`
+	JobId               string              `json:"job_id"`
+	JobType             string              `json:"job_type"`
+	StatementType       bigquery.NullString `json:"statement_type"`
+	Priority            string              `json:"priority"`
+	StartTime           time.Time           `json:"start_time"`
+	EndTime             time.Time           `json:"end_time"`
+	Query               string              `json:"query"`
+	State               string              `json:"state"`
+	ReservationId       bigquery.NullString `json:"reservation_id"`
+	TotalBytesProcessed bigquery.NullInt64  `json:"total_bytes_processed"`
+	TotalSlotMs         bigquery.NullInt64  `json:"total_slot_ms"`
 }
 
 type BigQueryJobsWithStats struct {
@@ -61,7 +61,7 @@ func attachBigQueryJobsWithStats(clusters map[string][]*BigQueryJob) []*BigQuery
 		totalBytesProcessed := 0
 		users := make([]string, 0)
 		for _, j := range c {
-			totalBytesProcessed += int(j.TotalBytesProcessed)
+			totalBytesProcessed += int(j.TotalBytesProcessed.Int64)
 			users = append(users, j.UserEmail)
 		}
 		stats := &BigQueryJobsWithStats{
