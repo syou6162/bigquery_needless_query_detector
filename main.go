@@ -192,7 +192,6 @@ WHERE
 		FROM
 			referenced_tables
 	)
-LIMIT 10000
 `,
 		informationSchema,
 		creationTime,
