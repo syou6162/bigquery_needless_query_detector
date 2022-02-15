@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"log"
 	"time"
 
 	"cloud.google.com/go/bigquery"
@@ -83,10 +84,10 @@ func attachBigQueryJobsWithStats(clusters map[string][]*BigQueryJob) []*BigQuery
 	return result
 }
 
-func getJobClusters(jobs []*BigQueryJob, minThreshold int) []*BigQueryJobsWithStats {
+func getJobClusters(jobs []*BigQueryJob, minThreshold int) ([]*BigQueryJobsWithStats, error) {
 	clusters := make(map[string][]*BigQueryJob)
 	if len(jobs) == 0 {
-		return nil // , error.Error("")
+		return nil, errors.New("Empty jobs")
 	}
 	clusters[jobs[0].JobId] = []*BigQueryJob{jobs[0]}
 
@@ -117,7 +118,7 @@ func getJobClusters(jobs []*BigQueryJob, minThreshold int) []*BigQueryJobsWithSt
 			}
 		}
 	}
-	return attachBigQueryJobsWithStats(clusters)
+	return attachBigQueryJobsWithStats(clusters), nil
 }
 
 // 以下のジョブの一覧を返すクエリリを生成する関数
@@ -248,14 +249,17 @@ func run() {
 
 	jobs, err := getBigQueryJobLogs(*project, *region, *type_, *creationTime)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 
-	clusters := getJobClusters(jobs, int(*minDistanceThreshold))
+	clusters, err := getJobClusters(jobs, int(*minDistanceThreshold))
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	s, err := json.Marshal(clusters)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	fmt.Println(string(s))
 }
