@@ -32,6 +32,7 @@ type BigQueryJob struct {
 
 type BigQueryJobsWithStats struct {
 	Jobs                []*BigQueryJob `json:"jobs"`
+	Count               int            `json:"count"`
 	TotalBytesProcessed int64          `json:"total_bytes_processed"`
 	Query               string         `json:"query"`
 }
@@ -71,7 +72,12 @@ func getJobClusters(jobs []*BigQueryJob, minThreshold int) []*BigQueryJobsWithSt
 		for _, j := range c {
 			totalBytesProcessed += int(j.TotalBytesProcessed)
 		}
-		stats := &BigQueryJobsWithStats{c, int64(totalBytesProcessed), c[0].Query}
+		stats := &BigQueryJobsWithStats{
+			Jobs:                c,
+			Count:               len(c),
+			TotalBytesProcessed: int64(totalBytesProcessed),
+			Query:               c[0].Query,
+		}
 		result = append(result, stats)
 	}
 
