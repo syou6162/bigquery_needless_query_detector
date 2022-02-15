@@ -159,6 +159,9 @@ WITH
     UNNEST(referenced_tables) AS referenced_tables
   WHERE
     creation_time > "%s"
+    AND referenced_tables.project_id IS NOT NULL
+    AND referenced_tables.dataset_id IS NOT NULL
+    AND referenced_tables.dataset_id IS NOT NULL
   GROUP BY
     referenced_tables.project_id,
     referenced_tables.dataset_id,
