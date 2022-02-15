@@ -123,11 +123,14 @@ func getJobClusters(jobs []*BigQueryJob, minThreshold int) []*BigQueryJobsWithSt
 // - ジョブが完了しており
 // - destination_tableが指定されているが、一定期間以内では使われていない
 func generate_query(projectID string, region string, type_ string, creationTime string) string {
-	var informationSchema string
+	// 組織レベルだとqueryカラムは含まれていない
+	informationSchema := "`" + projectID + "`." + "`region-" + region + "`.INFORMATION_SCHEMA.JOBS_BY_PROJECT"
+
+	var informationSchemaForReferencedTables string
 	if type_ == "PROJECT" {
-		informationSchema = "`" + projectID + "`." + "`region-" + region + "`.INFORMATION_SCHEMA.JOBS_BY_" + type_
+		informationSchemaForReferencedTables = "`" + projectID + "`." + "`region-" + region + "`.INFORMATION_SCHEMA.JOBS_BY_" + type_
 	} else if type_ == "ORGANIZATION" {
-		informationSchema = "`region-" + region + "`.INFORMATION_SCHEMA.JOBS_BY_" + type_
+		informationSchemaForReferencedTables = "`region-" + region + "`.INFORMATION_SCHEMA.JOBS_BY_" + type_
 	}
 
 	return fmt.Sprintf(`
@@ -190,7 +193,7 @@ LIMIT 10000
 `,
 		informationSchema,
 		creationTime,
-		informationSchema,
+		informationSchemaForReferencedTables,
 		creationTime,
 	)
 }
