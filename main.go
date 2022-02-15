@@ -54,6 +54,29 @@ func getMajority(slice []string) string {
 	return majority
 }
 
+func attachBigQueryJobsWithStats(clusters map[string][]*BigQueryJob) []*BigQueryJobsWithStats {
+	result := make([]*BigQueryJobsWithStats, 0)
+
+	for _, c := range clusters {
+		totalBytesProcessed := 0
+		users := make([]string, 0)
+		for _, j := range c {
+			totalBytesProcessed += int(j.TotalBytesProcessed)
+			users = append(users, j.UserEmail)
+		}
+		stats := &BigQueryJobsWithStats{
+			Jobs:                c,
+			Count:               len(c),
+			TotalBytesProcessed: int64(totalBytesProcessed),
+			Query:               c[0].Query,
+			UserEmail:           getMajority(users),
+		}
+		result = append(result, stats)
+	}
+
+	return result
+}
+
 func getJobClusters(jobs []*BigQueryJob, minThreshold int) []*BigQueryJobsWithStats {
 	clusters := make(map[string][]*BigQueryJob)
 	if len(jobs) == 0 {
@@ -88,26 +111,7 @@ func getJobClusters(jobs []*BigQueryJob, minThreshold int) []*BigQueryJobsWithSt
 			}
 		}
 	}
-
-	result := make([]*BigQueryJobsWithStats, 0)
-	for _, c := range clusters {
-		totalBytesProcessed := 0
-		users := make([]string, 0)
-		for _, j := range c {
-			totalBytesProcessed += int(j.TotalBytesProcessed)
-			users = append(users, j.UserEmail)
-		}
-		stats := &BigQueryJobsWithStats{
-			Jobs:                c,
-			Count:               len(c),
-			TotalBytesProcessed: int64(totalBytesProcessed),
-			Query:               c[0].Query,
-			UserEmail:           getMajority(users),
-		}
-		result = append(result, stats)
-	}
-
-	return result
+	return attachBigQueryJobsWithStats(clusters)
 }
 
 // 以下のジョブの一覧を返すクエリリを生成する関数
