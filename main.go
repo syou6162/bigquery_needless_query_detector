@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -11,7 +12,6 @@ import (
 	"cloud.google.com/go/bigquery"
 	"github.com/agnivade/levenshtein"
 	"google.golang.org/api/iterator"
-	"google.golang.org/protobuf/internal/errors"
 )
 
 type BigQueryJob struct {
