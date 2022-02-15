@@ -10,6 +10,7 @@ import (
 	"cloud.google.com/go/bigquery"
 	"github.com/agnivade/levenshtein"
 	"google.golang.org/api/iterator"
+	"google.golang.org/protobuf/internal/errors"
 )
 
 type BigQueryJob struct {
@@ -122,7 +123,7 @@ func getJobClusters(jobs []*BigQueryJob, minThreshold int) []*BigQueryJobsWithSt
 // 以下のジョブの一覧を返すクエリリを生成する関数
 // - ジョブが完了しており
 // - destination_tableが指定されているが、一定期間以内では使われていない
-func generate_query(projectID string, region string, type_ string, creationTime string) string {
+func generate_query(projectID string, region string, type_ string, creationTime string) (string, error) {
 	// 組織レベルだとqueryカラムは含まれていない
 	informationSchema := "`" + projectID + "`." + "`region-" + region + "`.INFORMATION_SCHEMA.JOBS_BY_PROJECT"
 
@@ -131,9 +132,11 @@ func generate_query(projectID string, region string, type_ string, creationTime 
 		informationSchemaForReferencedTables = "`" + projectID + "`." + "`region-" + region + "`.INFORMATION_SCHEMA.JOBS_BY_" + type_
 	} else if type_ == "ORGANIZATION" {
 		informationSchemaForReferencedTables = "`region-" + region + "`.INFORMATION_SCHEMA.JOBS_BY_" + type_
+	} else {
+		return "", errors.New(fmt.Sprintf("Unknown type: %s", type_))
 	}
 
-	return fmt.Sprintf(`
+	query := fmt.Sprintf(`
 WITH
   filtered_jobs AS (
   SELECT
@@ -198,6 +201,7 @@ WHERE
 		informationSchemaForReferencedTables,
 		creationTime,
 	)
+	return query, nil
 }
 
 func getBigQueryJobLogs(projectId string, region string, type_ string, creationTime string) ([]*BigQueryJob, error) {
@@ -206,7 +210,11 @@ func getBigQueryJobLogs(projectId string, region string, type_ string, creationT
 	if err != nil {
 		return nil, err
 	}
-	query := generate_query(projectId, region, type_, creationTime)
+
+	query, err := generate_query(projectId, region, type_, creationTime)
+	if err != nil {
+		return nil, err
+	}
 
 	iter, err := client.Query(query).Read(ctx)
 	if err != nil {
