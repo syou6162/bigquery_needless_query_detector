@@ -37,6 +37,7 @@ type BigQueryJobsWithStats struct {
 	TotalBytesProcessed int64          `json:"total_bytes_processed"`
 	Query               string         `json:"query"`
 	UserEmail           string         `json:"user_email"`
+	DestinationTable    string         `json:"destination_table"`
 }
 
 func getMajority(slice []string) string {
@@ -61,9 +62,11 @@ func attachBigQueryJobsWithStats(clusters map[string][]*BigQueryJob) []*BigQuery
 	for _, c := range clusters {
 		totalBytesProcessed := 0
 		users := make([]string, 0)
+		destinationTables := make([]string, 0)
 		for _, j := range c {
 			totalBytesProcessed += int(j.TotalBytesProcessed.Int64)
 			users = append(users, j.UserEmail)
+			destinationTables = append(destinationTables, j.DestinationTable)
 		}
 		stats := &BigQueryJobsWithStats{
 			Jobs:                c,
@@ -71,6 +74,7 @@ func attachBigQueryJobsWithStats(clusters map[string][]*BigQueryJob) []*BigQuery
 			TotalBytesProcessed: int64(totalBytesProcessed),
 			Query:               c[0].Query,
 			UserEmail:           getMajority(users),
+			DestinationTable:    getMajority(destinationTables),
 		}
 		result = append(result, stats)
 	}
