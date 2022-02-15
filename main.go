@@ -24,6 +24,7 @@ type BigQueryJob struct {
 	StartTime           time.Time           `json:"start_time"`
 	EndTime             time.Time           `json:"end_time"`
 	Query               string              `json:"query"`
+	DestinationTable    string              `json:"destination_table"`
 	State               string              `json:"state"`
 	ReservationId       bigquery.NullString `json:"reservation_id"`
 	TotalBytesProcessed bigquery.NullInt64  `json:"total_bytes_processed"`
@@ -160,6 +161,7 @@ SELECT
 	start_time AS StartTime,
 	end_time AS EndTime,
   query AS Query,
+	destination_table.project_id || ":" || destination_table.dataset_id || "." || destination_table.table_id AS DestinationTable,
 	state AS State,
 	reservation_id AS ReservationId,
 	total_bytes_processed AS TotalBytesProcessed,
