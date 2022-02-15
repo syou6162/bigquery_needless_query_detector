@@ -47,9 +47,13 @@ func getJobClusters(jobs []*BigQueryJob, minThreshold int) []*BigQueryJobsWithSt
 	for _, j := range jobs[1:] {
 		minDist := 10000
 		var minClusterJobId string
+		hasExactMatchCluster := false
 		for representativeJob, c := range clusters {
+			// クエリが同一文字列ならば編集距離を使う必要はない
 			if j.Query == c[0].Query {
-				// fmt.Println("Exact!!!")
+				clusters[representativeJob] = append(clusters[representativeJob], j)
+				hasExactMatchCluster = true
+				break
 			}
 			dist := levenshtein.ComputeDistance(j.Query, c[0].Query)
 			if dist < minDist {
@@ -57,12 +61,14 @@ func getJobClusters(jobs []*BigQueryJob, minThreshold int) []*BigQueryJobsWithSt
 				minDist = dist
 			}
 		}
-		// 既存クラスタとの距離が閾値以上のため、新規のクラスタを作る
-		if minDist > minThreshold {
-			clusters[j.JobId] = []*BigQueryJob{j}
-		} else {
-			// 既存のクラスタに追加
-			clusters[minClusterJobId] = append(clusters[minClusterJobId], j)
+		if !hasExactMatchCluster {
+			// 既存クラスタとの距離が閾値以上のため、新規のクラスタを作る
+			if minDist > minThreshold {
+				clusters[j.JobId] = []*BigQueryJob{j}
+			} else {
+				// 既存のクラスタに追加
+				clusters[minClusterJobId] = append(clusters[minClusterJobId], j)
+			}
 		}
 	}
 
