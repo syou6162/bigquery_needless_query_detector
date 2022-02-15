@@ -122,7 +122,7 @@ func getJobClusters(jobs []*BigQueryJob, minThreshold int) []*BigQueryJobsWithSt
 // 以下のジョブの一覧を返すクエリリを生成する関数
 // - ジョブが完了しており
 // - destination_tableが指定されているが、一定期間以内では使われていない
-func generate_query(projectID string, region string, type_ string) string {
+func generate_query(projectID string, region string, type_ string, creationTime string) string {
 	informationSchema := "`" + projectID + "`." + "`region-" + region + "`.INFORMATION_SCHEMA.JOBS_BY_" + type_
 	return fmt.Sprintf(`
 WITH
@@ -137,6 +137,7 @@ WITH
     AND state = "DONE"
     AND destination_table.project_id IS NOT NULL
     AND NOT STARTS_WITH(destination_table.dataset_id, "_")
+    AND creation_time > "%s"
   ORDER BY
     total_bytes_processed DESC ),
   referenced_tables AS (
@@ -148,7 +149,7 @@ WITH
     %s,
     UNNEST(referenced_tables) AS referenced_tables
   WHERE
-    creation_time > "2020-02-01"
+    creation_time > "%s"
   GROUP BY
     referenced_tables.project_id,
     referenced_tables.dataset_id,
@@ -182,17 +183,19 @@ WHERE
 LIMIT 10000
 `,
 		informationSchema,
+		creationTime,
 		informationSchema,
+		creationTime,
 	)
 }
 
-func getBigQueryJobLogs(projectId string, region string, type_ string) ([]*BigQueryJob, error) {
+func getBigQueryJobLogs(projectId string, region string, type_ string, creationTime string) ([]*BigQueryJob, error) {
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectId)
 	if err != nil {
 		return nil, err
 	}
-	query := generate_query(projectId, region, type_)
+	query := generate_query(projectId, region, type_, creationTime)
 
 	iter, err := client.Query(query).Read(ctx)
 	if err != nil {
@@ -219,11 +222,12 @@ func run() {
 		project              = flag.String("project", "", "GCP project")
 		region               = flag.String("region", "us", "BigQuery region")
 		type_                = flag.String("type", "PROJECT", "PROJECT or ORGANIZATION")
+		creationTime         = flag.String("creation_time", time.Now().Add(-24*7*time.Hour).Format("2006-01-02"), "Select all job list after this creation_time")
 		minDistanceThreshold = flag.Int64("min_distance_threshold", 0, "Minimum query edit distance threshold. This threshold is used to decide two queries are same one.")
 	)
 	flag.Parse()
 
-	jobs, err := getBigQueryJobLogs(*project, *region, *type_)
+	jobs, err := getBigQueryJobLogs(*project, *region, *type_, *creationTime)
 	if err != nil {
 		fmt.Println(err)
 	}
