@@ -3,13 +3,13 @@
 
 ## Install
 
-```
-go install github.com/syou6162/bigquery_needless_query_detector@latest
+```sh
+% go install github.com/syou6162/bigquery_needless_query_detector@latest
 ```
 
 ## Usage
 
-```
+```sh
 % ./bigquery_needlessness_query_detector \
     --project ml-news --region asia-northeast1 \
     --min_distance_threshold 10 \
