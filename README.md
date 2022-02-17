@@ -15,7 +15,7 @@ go install github.com/syou6162/bigquery_needless_query_detector@latest
     --min_distance_threshold 10 \
     --creation_time 2021-02-07 --type PROJECT > out.json
 
-% cat hoge.json | \
+% cat out.json | \
     jq -c 'sort_by(.total_bytes_processed) | reverse | .[] | select(.total_bytes_processed > 0) | {"total_bytes_processed": .total_bytes_processed, "query": .query[0:50], "count": .count, "user_email": .user_email, "destination_table": .destination_table}' | \
     head -n 2 | \
     jq .
