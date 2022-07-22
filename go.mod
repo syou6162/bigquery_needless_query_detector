@@ -1,6 +1,6 @@
 module github.com/syou6162/bigquery_needlessness_query_detector
 
-go 1.16
+go 1.18
 
 require (
 	cloud.google.com/go/bigquery v1.34.1
