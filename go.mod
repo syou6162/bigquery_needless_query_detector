@@ -5,7 +5,7 @@ go 1.19
 require (
 	cloud.google.com/go/bigquery v1.37.0
 	github.com/agnivade/levenshtein v1.1.1
-	google.golang.org/api v0.91.0
+	google.golang.org/api v0.92.0
 )
 
 require (
