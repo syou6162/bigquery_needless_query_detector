@@ -1,10 +1,12 @@
 module github.com/syou6162/bigquery_needlessness_query_detector
 
-go 1.19
+go 1.21
+
+toolchain go1.23.1
 
 require (
 	cloud.google.com/go/bigquery v1.62.0
-	github.com/agnivade/levenshtein v1.1.1
+	github.com/agnivade/levenshtein v1.2.0
 	google.golang.org/api v0.189.0
 )
 
