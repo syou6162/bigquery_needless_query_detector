@@ -7,7 +7,7 @@ toolchain go1.23.3
 require (
 	cloud.google.com/go/bigquery v1.64.0
 	github.com/agnivade/levenshtein v1.1.1
-	google.golang.org/api v0.213.0
+	google.golang.org/api v0.214.0
 )
 
 require (
@@ -40,7 +40,7 @@ require (
 	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
 	golang.org/x/mod v0.20.0 // indirect
-	golang.org/x/net v0.32.0 // indirect
+	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/oauth2 v0.24.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
