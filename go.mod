@@ -2,7 +2,7 @@ module github.com/syou6162/bigquery_needlessness_query_detector
 
 go 1.23.0
 
-toolchain go1.23.3
+toolchain go1.24.5
 
 require (
 	cloud.google.com/go/bigquery v1.69.0
