@@ -7,7 +7,7 @@ toolchain go1.24.5
 require (
 	cloud.google.com/go/bigquery v1.69.0
 	github.com/agnivade/levenshtein v1.2.1
-	google.golang.org/api v0.244.0
+	google.golang.org/api v0.246.0
 )
 
 require (
